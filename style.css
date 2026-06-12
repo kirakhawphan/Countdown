@@ -57,7 +57,7 @@ body {
 .layout-container {
     width: 90vw;
     max-width: 1400px;
-    height: 90vh;
+    height: 96vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -197,6 +197,15 @@ body {
     border-radius: 50%;
 }
 
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.song-img.playing {
+    animation: spin 15s linear infinite;
+}
+
 .song-details {
     display: flex;
     flex-direction: column;
@@ -284,6 +293,8 @@ body {
     border-radius: 16px;
     padding: 2.5rem;
     width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 25px 50px -12px rgba(0,0,0,1);
     transform: translateY(20px);
     transition: transform 0.3s ease;

@@ -35,29 +35,10 @@
 
             <div class="settings-group">
                 <label>Topic / Event Name</label>
-                <input type="text" id="input-topic" class="text-input" placeholder="Enter topic name..."
-                    value="Topic / Event Name">
+                <input type="text" id="input-topic" class="text-input" placeholder="Enter topic name..." value="KUY">
             </div>
 
-            <div class="settings-group">
-                <label>Upload Media (คลิกเพื่อเลือกไฟล์)</label>
-                <div class="upload-container">
-                    <div class="upload-btn-wrapper">
-                        <button class="btn outline">🎵 Select Song</button>
-                        <input type="file" id="upload-audio" accept="audio/*">
-                    </div>
-                    <div class="upload-btn-wrapper">
-                        <button class="btn outline">🖼️ Select Cover</button>
-                        <input type="file" id="upload-cover" accept="image/*">
-                    </div>
-                    <div class="upload-btn-wrapper">
-                        <button class="btn outline">✨ Select Logos (Max 4)</button>
-                        <input type="file" id="upload-logos" accept="image/*" multiple>
-                    </div>
-                </div>
-            </div>
-
-            <div class="time-inputs">
+            <div class="time-inputs" style="margin-bottom: 20px;">
                 <div class="input-group">
                     <label>Hours</label>
                     <input type="number" id="input-hours" min="0" max="99" value="00">
@@ -73,6 +54,8 @@
                     <input type="number" id="input-seconds" min="0" max="59" value="00">
                 </div>
             </div>
+
+
         </div>
     </div>
 
@@ -85,10 +68,10 @@
         <!-- Top section: 4 Logos -->
         <header class="logo-container">
             <!-- ไฟล์รูปโลโก้ถูกตั้งค่าให้อ่านจากโฟลเดอร์ Pic -->
-            <div class="logo-box"><img src="Pic/logo1.png" alt="Logo 1"></div>
-            <div class="logo-box"><img src="Pic/logo2.png" alt="Logo 2"></div>
-            <div class="logo-box"><img src="Pic/logo3.png" alt="Logo 3"></div>
-            <div class="logo-box"><img src="Pic/logo4.png" alt="Logo 4"></div>
+            <div class="logo-box"><img src="Logo/logo1.png" alt="Logo 1"></div>
+            <div class="logo-box"><img src="Logo/logo2.png" alt="Logo 2"></div>
+            <div class="logo-box"><img src="Logo/logo3.png" alt="Logo 3"></div>
+            <div class="logo-box"><img src="Logo/logo4.png" alt="Logo 4"></div>
         </header>
 
         <!-- Countdown section -->
@@ -103,7 +86,7 @@
         <!-- Topic divider -->
         <div class="topic-divider">
             <div class="line"></div>
-            <div class="topic-text" contenteditable="true" spellcheck="false">Topic / Event Name</div>
+            <div class="topic-text" contenteditable="true" spellcheck="false">KUY</div>
             <div class="line"></div>
         </div>
 
@@ -111,18 +94,32 @@
         <footer class="bottom-bar">
             <div class="song-info-container">
                 <div class="song-image-circle">
-                    <img id="current-song-img" src="https://via.placeholder.com/90/222/fff?text=MUSIC" alt="Song Cover" class="song-img">
+                    <img id="current-song-img" src="https://via.placeholder.com/90/222/fff?text=MUSIC" alt="Song Cover"
+                        class="song-img">
                 </div>
                 <div class="song-details">
-                    <div class="song-row">
+                    <div class="song-row" style="position: relative;">
                         <span class="label">Name</span>
-                        <span id="current-song-name" class="dots editable-text" contenteditable="true"
-                            spellcheck="false">พิมพ์ชื่อเพลงที่นี่...</span>
+                        <span id="current-song-name" class="dots"
+                            style="min-width: 250px; display: inline-block; padding-bottom: 4px; cursor: pointer; border-bottom: 1px dashed rgba(255,255,255,0.3);"
+                            title="Click to select song">พิมพ์ชื่อเพลงที่นี่...</span>
+                        <div id="playlist-dropdown"
+                            style="display: none; position: absolute; bottom: 100%; left: 0; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; width: 300px; max-height: 250px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                            <!-- List injected by JS -->
+                        </div>
                     </div>
-                    <div class="song-row">
+                    <div class="song-row" style="position: relative;">
                         <span class="label">Credit</span>
-                        <span id="current-song-credit" class="dots editable-text" contenteditable="true"
-                            spellcheck="false">พิมพ์ชื่อศิลปินที่นี่...</span>
+                        <span id="current-song-credit" class="dots"
+                            style="min-width: 250px; display: inline-block; padding-bottom: 4px;">พิมพ์ชื่อศิลปินที่นี่...</span>
+                    </div>
+                    <div class="song-row" style="margin-top: 5px; gap: 10px; width: 100%;">
+                        <span id="song-current-time"
+                            style="font-size: 0.8rem; color: #888; font-family: var(--font-mono); min-width: 40px;">0:00</span>
+                        <input type="range" id="song-seek-bar" min="0" max="100" value="0"
+                            style="flex-grow: 1; height: 4px; border-radius: 2px; cursor: pointer; accent-color: var(--accent); background: rgba(255,255,255,0.2); outline: none; -webkit-appearance: none;">
+                        <span id="song-total-time"
+                            style="font-size: 0.8rem; color: #888; font-family: var(--font-mono); min-width: 40px;">0:00</span>
                     </div>
                 </div>
             </div>
@@ -138,6 +135,7 @@
     <!-- Audio Element for Song -->
     <audio id="bg-music" preload="auto"></audio>
 
+    <script src="playlist.js"></script>
     <script src="script.js"></script>
 </body>
 
