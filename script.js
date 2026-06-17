@@ -6,20 +6,34 @@ const minutesEl = document.getElementById('minutes');
 const secondsEl = document.getElementById('seconds');
 const millisecondsEl = document.getElementById('milliseconds');
 
-const inputHours = document.getElementById('input-hours');
-const inputMinutes = document.getElementById('input-minutes');
-const inputSeconds = document.getElementById('input-seconds');
 
-const btnStart = document.getElementById('btn-start');
-const btnPause = document.getElementById('btn-pause');
-const btnReset = document.getElementById('btn-reset');
 
-const settingsBtn = document.getElementById('settings-btn');
-const settingsModal = document.getElementById('settings-modal');
-const closeModalBtn = document.getElementById('close-modal');
-
-const inputTopic = document.getElementById('input-topic');
 const topicText = document.querySelector('.topic-text');
+
+// Limit topic text to 3 lines
+topicText.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const lines = topicText.innerText.replace(/\n$/, '').split('\n').length;
+        if (lines >= 3) {
+            e.preventDefault();
+        }
+    }
+});
+
+topicText.addEventListener('input', () => {
+    const lines = topicText.innerText.replace(/\n$/, '').split('\n');
+    if (lines.length > 3) {
+        topicText.innerText = lines.slice(0, 3).join('\n');
+        
+        // Move cursor to end
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(topicText);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+});
 
 // Song Elements
 const currentSongImg = document.getElementById('current-song-img');
@@ -27,9 +41,7 @@ const currentSongName = document.getElementById('current-song-name');
 const currentSongCredit = document.getElementById('current-song-credit');
 const bgMusic = document.getElementById('bg-music');
 const playlistDropdown = document.getElementById('playlist-dropdown');
-const songCurrentTime = document.getElementById('song-current-time');
-const songTotalTime = document.getElementById('song-total-time');
-const songSeekBar = document.getElementById('song-seek-bar');
+
 
 // State variables
 let countdownInterval;
@@ -87,9 +99,9 @@ function updateDisplay(ms) {
 
 // Calculate total milliseconds from inputs
 function getTargetTime() {
-    const h = parseInt(inputHours.value) || 0;
-    const m = parseInt(inputMinutes.value) || 0;
-    const s = parseInt(inputSeconds.value) || 0;
+    const h = parseInt(hoursEl.innerText) || 0;
+    const m = parseInt(minutesEl.innerText) || 0;
+    const s = parseInt(secondsEl.innerText) || 0;
 
     return (h * 60 * 60 * 1000) + (m * 60 * 1000) + (s * 1000);
 }
@@ -114,21 +126,21 @@ function timerStep() {
 function startTimer() {
     if (isRunning) return;
 
-    // If we're starting fresh, get time from inputs
-    if (timeRemaining <= 0) {
-        timeRemaining = getTargetTime();
-        if (timeRemaining <= 0) return; // Don't start if 0
-    }
+    hoursEl.blur();
+    minutesEl.blur();
+    secondsEl.blur();
+
+    // Read time from display
+    timeRemaining = getTargetTime();
+    
+    if (timeRemaining <= 0) return; // Don't start if 0
 
     isRunning = true;
     expectedEndTime = Date.now() + timeRemaining;
 
-    // Update UI states
-    btnStart.disabled = true;
-    btnPause.disabled = false;
-    inputHours.disabled = true;
-    inputMinutes.disabled = true;
-    inputSeconds.disabled = true;
+    hoursEl.contentEditable = "false";
+    minutesEl.contentEditable = "false";
+    secondsEl.contentEditable = "false";
 
     countdownInterval = requestAnimationFrame(timerStep);
 
@@ -136,9 +148,6 @@ function startTimer() {
     if (bgMusic.src && bgMusic.src !== window.location.href) {
         bgMusic.play().catch(e => console.log("Audio play prevented by browser"));
     }
-
-    // Optional: Close modal automatically when starting
-    settingsModal.classList.remove('show');
 }
 
 // Pause Timer
@@ -148,9 +157,9 @@ function pauseTimer() {
     isRunning = false;
     cancelAnimationFrame(countdownInterval);
 
-    // UI Updates
-    btnStart.disabled = false;
-    btnPause.disabled = true;
+    hoursEl.contentEditable = "true";
+    minutesEl.contentEditable = "true";
+    secondsEl.contentEditable = "true";
 
     // Pause music
     bgMusic.pause();
@@ -164,13 +173,6 @@ function resetTimer() {
     timeRemaining = getTargetTime();
     updateDisplay(timeRemaining);
 
-    // UI Updates
-    btnStart.disabled = false;
-    btnPause.disabled = true;
-    inputHours.disabled = false;
-    inputMinutes.disabled = false;
-    inputSeconds.disabled = false;
-
     // Reset music
     bgMusic.pause();
     bgMusic.currentTime = 0;
@@ -179,11 +181,10 @@ function resetTimer() {
 // Timer Finished
 function finishTimer() {
     isRunning = false;
-    btnStart.disabled = false;
-    btnPause.disabled = true;
-    inputHours.disabled = false;
-    inputMinutes.disabled = false;
-    inputSeconds.disabled = false;
+
+    hoursEl.contentEditable = "true";
+    minutesEl.contentEditable = "true";
+    secondsEl.contentEditable = "true";
 
     // Visual feedback on finish (can be customized)
     document.querySelector('.time-display').style.color = '#ff003c';
@@ -195,60 +196,59 @@ function finishTimer() {
     bgMusic.pause();
 }
 
-// Modal Logic
-settingsBtn.addEventListener('click', () => {
-    // Sync the input value with the current text when opening
-    inputTopic.value = topicText.innerText;
-    settingsModal.classList.add('show');
+
+// Input validation for time elements
+[hoursEl, minutesEl, secondsEl].forEach(el => {
+    el.addEventListener('keydown', (e) => {
+        // Prevent enter, just blur
+        if (['Enter'].includes(e.key)) {
+            e.preventDefault();
+            el.blur();
+            return;
+        }
+        // Allow navigation, deletion, copy/paste
+        if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+        if (e.ctrlKey || e.metaKey) return;
+        
+        // Prevent non-numeric input
+        if (!/^\d$/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    el.addEventListener('blur', () => {
+        if (isRunning) return;
+        
+        let val = parseInt(el.innerText);
+        if (isNaN(val)) val = 0;
+        
+        // Clamp values
+        if (el === hoursEl && val > 99) val = 99;
+        if (el !== hoursEl && val > 59) val = 59;
+        
+        el.innerText = formatTime(val);
+        
+        timeRemaining = getTargetTime();
+        updateDisplay(timeRemaining);
+    });
 });
 
-closeModalBtn.addEventListener('click', () => {
-    settingsModal.classList.remove('show');
-});
-
-settingsModal.addEventListener('click', (e) => {
-    // Close modal when clicking outside the content box
-    if (e.target === settingsModal) {
-        settingsModal.classList.remove('show');
+// Spacebar to toggle start/pause
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+        // Don't toggle if typing in a text input or contenteditable element, EXCEPT our time spans
+        if ((e.target.tagName.toLowerCase() === 'input' && e.target.type === 'text') || 
+            (e.target.isContentEditable && e.target !== hoursEl && e.target !== minutesEl && e.target !== secondsEl)) {
+            return;
+        }
+        
+        e.preventDefault();
+        if (isRunning) {
+            pauseTimer();
+        } else {
+            startTimer();
+        }
     }
-});
-
-// Text Sync Logic
-inputTopic.addEventListener('input', (e) => {
-    topicText.innerText = e.target.value || "Topic / Event Name";
-});
-
-topicText.addEventListener('input', (e) => {
-    inputTopic.value = e.target.innerText;
-});
-
-// Event Listeners for Timer Controls
-btnStart.addEventListener('click', startTimer);
-btnPause.addEventListener('click', pauseTimer);
-btnReset.addEventListener('click', resetTimer);
-
-// Input validations to prevent negative or overly large numbers
-[inputHours, inputMinutes, inputSeconds].forEach(input => {
-    input.addEventListener('input', function () {
-        let val = parseInt(this.value);
-        if (isNaN(val) || val < 0) this.value = "00";
-        if (this.id !== 'input-hours' && val > 59) this.value = "59";
-        if (this.id === 'input-hours' && val > 99) this.value = "99";
-
-        // Update display live as user types
-        if (!isRunning) {
-            timeRemaining = getTargetTime();
-            updateDisplay(timeRemaining);
-        }
-    });
-
-    input.addEventListener('blur', function () {
-        if (this.value.length === 1) {
-            this.value = '0' + this.value;
-        } else if (this.value === '') {
-            this.value = '00';
-        }
-    });
 });
 
 // Initialize Display
@@ -368,30 +368,4 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// 2. Seek Bar Logic
-function formatAudioTime(seconds) {
-    if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s < 10 ? '0' + s : s}`;
-}
 
-bgMusic.addEventListener('loadedmetadata', () => {
-    if (songTotalTime) songTotalTime.innerText = formatAudioTime(bgMusic.duration);
-    if (songSeekBar) songSeekBar.max = bgMusic.duration;
-});
-
-bgMusic.addEventListener('timeupdate', () => {
-    if (songCurrentTime) songCurrentTime.innerText = formatAudioTime(bgMusic.currentTime);
-    if (songSeekBar && !songSeekBar.matches(':active')) {
-        // Only update slider if user is not currently dragging it
-        songSeekBar.value = bgMusic.currentTime;
-    }
-});
-
-if (songSeekBar) {
-    songSeekBar.addEventListener('input', () => {
-        bgMusic.currentTime = songSeekBar.value;
-        if (songCurrentTime) songCurrentTime.innerText = formatAudioTime(bgMusic.currentTime);
-    });
-}

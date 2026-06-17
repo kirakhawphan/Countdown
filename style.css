@@ -68,8 +68,9 @@ body {
 /* Top Section: Logos */
 .logo-container {
     display: flex;
-    justify-content: space-between;
-    width: 80%;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
     margin: 0 auto;
     padding-top: 2rem;
 }
@@ -131,6 +132,21 @@ body {
     50% { opacity: 0.2; }
 }
 
+.time-display span[contenteditable="true"] {
+    outline: none;
+    cursor: text;
+    transition: all 0.3s ease;
+}
+
+.time-display span[contenteditable="true"]:hover {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.time-display span[contenteditable="true"]:focus {
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(0, 240, 255, 0.5);
+}
+
 /* Topic Divider */
 .topic-divider {
     display: flex;
@@ -153,6 +169,7 @@ body {
     letter-spacing: 4px;
     color: #ffffff;
     text-transform: uppercase;
+    text-align: center;
     transition: color 0.3s ease;
 }
 
